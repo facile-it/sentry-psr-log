@@ -1,6 +1,11 @@
 # Change Log
 
-## [1.0.0] - 2016-07-01
+
+## [1.0.1] - TBD
+### Added
+- Nothing
+
+## [1.0.0] - 2016-07-02
 ### Added
 - Stable release
 ### Changed
