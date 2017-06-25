@@ -1,8 +1,12 @@
 # Change Log
 
-## [2.0.1] - TBD
-### Added
+## [2.0.2] - TBD
+### Changed
 - Nothing
+
+## [2.0.1] - 2017-06-25
+### Changed
+- Added namespace to ignore during backtrace when sender is not passed in constructor
 
 ## [2.0.0] - 2017-06-25
 ### Changed

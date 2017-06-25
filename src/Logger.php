@@ -59,7 +59,11 @@ class Logger implements LoggerInterface
         SanitizerInterface $sanitizer = null
     ) {
         $this->client = $client;
-        $this->sender = $sender ?: new Sender($client, $sanitizer);
+        if (! $sender) {
+            $sender = new Sender($client, $sanitizer);
+            $sender->getStackTrace()->addIgnoreBacktraceNamespace(__NAMESPACE__);
+        }
+        $this->sender = $sender;
         $this->sanitizer = $sanitizer ?: new Sanitizer();
     }
 

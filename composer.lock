@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "546e8231b3ce7fdd254fee557e834e53",
+    "content-hash": "0bbf639907c9b210dfd4685890bf403e",
     "packages": [
         {
             "name": "facile-it/sentry-common",
-            "version": "0.1.0",
+            "version": "0.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/facile-it/sentry-common.git",
-                "reference": "aa3f4214db241c7d714dbf5b1c8346b66bcbc6b5"
+                "reference": "e980a105e06eb7befa1d136712470482935ed737"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/facile-it/sentry-common/zipball/aa3f4214db241c7d714dbf5b1c8346b66bcbc6b5",
-                "reference": "aa3f4214db241c7d714dbf5b1c8346b66bcbc6b5",
+                "url": "https://api.github.com/repos/facile-it/sentry-common/zipball/e980a105e06eb7befa1d136712470482935ed737",
+                "reference": "e980a105e06eb7befa1d136712470482935ed737",
                 "shasum": ""
             },
             "require": {
@@ -52,7 +52,7 @@
                 "raven",
                 "sentry"
             ],
-            "time": "2017-06-25T12:55:23+00:00"
+            "time": "2017-06-25T13:34:25+00:00"
         },
         {
             "name": "psr/log",
