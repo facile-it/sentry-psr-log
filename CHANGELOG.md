@@ -1,9 +1,17 @@
 # Change Log
 
-
-## [1.0.2] - TBD
+## [2.0.1] - TBD
 ### Added
 - Nothing
+
+## [2.0.0] - 2017-06-25
+### Changed
+- Require `sentry/sentry` ^1.7
+- Drop support of PHP 5.6
+- Use of `facile-it/sentry-common` to process and send logs
+
+### Removed
+- Removed `ContextException`
 
 ## [1.0.1] - 2016-09-01
 ### Added

@@ -2,107 +2,110 @@
 
 namespace Facile\Sentry\LogTest;
 
+use Facile\Sentry\Common\Sanitizer\SanitizerInterface;
+use Facile\Sentry\Common\Sender\SenderInterface;
 use Facile\Sentry\Log\ContextException;
 use Facile\Sentry\Log\Logger;
 use Prophecy\Argument;
+use Psr\Log\InvalidArgumentException;
 use Psr\Log\LogLevel;
 
-class LoggerTest extends \PHPUnit_Framework_TestCase
+class LoggerTest extends \PHPUnit\Framework\TestCase
 {
-    /**
-     * @expectedException \Psr\Log\InvalidArgumentException
-     */
     public function testLogWithInvalidLevel()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $raven = $this->prophesize(\Raven_Client::class);
         $logger = new Logger($raven->reveal());
 
         $logger->log('foo', 'message');
     }
 
-    /**
-     * @expectedException \Psr\Log\InvalidArgumentException
-     */
     public function testLogWithInvalidObject()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $raven = $this->prophesize(\Raven_Client::class);
         $logger = new Logger($raven->reveal());
 
         $logger->log(LogLevel::ALERT, new \stdClass());
     }
 
-    public function testLogWithException()
+    public function testLogWithObject()
     {
         $raven = $this->prophesize(\Raven_Client::class);
-        $logger = new Logger($raven->reveal());
+        $sender = $this->prophesize(SenderInterface::class);
+        $sanitizer = $this->prophesize(SanitizerInterface::class);
+        $logger = new Logger(
+            $raven->reveal(),
+            $sender->reveal(),
+            $sanitizer->reveal()
+        );
 
-        $exception = $this->prophesize(\Exception::class);
+        $object = new class {
+            public function __toString()
+            {
+                return 'object string';
+            }
+        };
+
         $context = [
             'foo' => 'name',
-            'object' => new \stdClass(),
         ];
 
-        $raven->captureException(
-            $exception->reveal(),
-            ['extra' => ['foo' => 'name', 'object' => 'stdClass'], 'level' => \Raven_Client::ERROR]
-        )
+        $sanitizer->sanitize($context)->shouldBeCalled()->willReturn($context);
+        $sender->send(\Raven_Client::ERROR, 'object string', $context)
             ->shouldBeCalled();
 
-        $logger->log(LogLevel::ALERT, $exception->reveal(), $context);
+        $logger->log(LogLevel::ALERT, $object, $context);
     }
 
-    public function testLogWithExceptionInContext()
+    public function testLog()
     {
         $raven = $this->prophesize(\Raven_Client::class);
-        $logger = new Logger($raven->reveal());
+        $sender = $this->prophesize(SenderInterface::class);
+        $sanitizer = $this->prophesize(SanitizerInterface::class);
+        $logger = new Logger(
+            $raven->reveal(),
+            $sender->reveal(),
+            $sanitizer->reveal()
+        );
 
-        $exception = new \RuntimeException('foo exception message', 102);
         $context = [
-            'exception' => $exception,
             'foo' => 'name',
-            'object' => new \stdClass(),
+            'placeholder' => 'value'
         ];
 
-        $raven->captureException(
-            Argument::that(function ($e) use ($exception) {
-                return $e instanceof ContextException &&
-                $e->getMessage() === 'foo name' &&
-                $e->getCode() === 102 &&
-                $e->getPrevious() === $exception;
-            }),
-            ['extra' => ['foo' => 'name', 'object' => 'stdClass'], 'level' => \Raven_Client::ERROR]
-        )
+        $sanitizer->sanitize($context)->shouldBeCalled()->willReturn($context);
+        $sender->send(\Raven_Client::ERROR, 'message value', $context)
             ->shouldBeCalled();
 
-        $logger->log(LogLevel::ALERT, 'foo {foo}', $context);
+        $logger->log(LogLevel::ALERT, 'message {placeholder}', $context);
     }
 
-    public function testLogWithMessage()
+    public function testLogWithArrayPlaceholder()
     {
         $raven = $this->prophesize(\Raven_Client::class);
-        $logger = new Logger($raven->reveal());
+        $sender = $this->prophesize(SenderInterface::class);
+        $sanitizer = $this->prophesize(SanitizerInterface::class);
+        $logger = new Logger(
+            $raven->reveal(),
+            $sender->reveal(),
+            $sanitizer->reveal()
+        );
 
         $context = [
             'foo' => 'name',
-            'object' => new \stdClass(),
-            'resource' => tmpfile(),
-            'array_object' => new \ArrayObject(['foo' => 'bar']),
+            'placeholder' => [
+                'foo' => 'bar',
+            ]
         ];
 
-        $raven->captureMessage(
-            'foo',
-            [
-                'extra' => [
-                    'foo' => 'name',
-                    'object' => 'stdClass',
-                    'resource' => 'stream',
-                    'array_object' => ['foo' => 'bar'],
-                ],
-            ],
-            \Raven_Client::ERROR
-        )
+        $sanitizer->sanitize($context)->shouldBeCalled()->willReturn($context);
+        $sender->send(\Raven_Client::ERROR, 'message {placeholder}', $context)
             ->shouldBeCalled();
 
-        $logger->log(LogLevel::ALERT, 'foo', $context);
+        $logger->log(LogLevel::ALERT, 'message {placeholder}', $context);
     }
 }

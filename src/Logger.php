@@ -2,6 +2,10 @@
 
 namespace Facile\Sentry\Log;
 
+use Facile\Sentry\Common\Sanitizer\Sanitizer;
+use Facile\Sentry\Common\Sanitizer\SanitizerInterface;
+use Facile\Sentry\Common\Sender\Sender;
+use Facile\Sentry\Common\Sender\SenderInterface;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
@@ -18,7 +22,16 @@ class Logger implements LoggerInterface
     /**
      * @var Raven_Client
      */
-    protected $ravenClient;
+    protected $client;
+    /**
+     * @var SenderInterface
+     */
+    private $sender;
+    /**
+     * @var SanitizerInterface
+     */
+    private $sanitizer;
+
     /**
      * @var array
      */
@@ -40,34 +53,14 @@ class Logger implements LoggerInterface
     const ERROR = 'error';
     const FATAL = 'fatal';
 
-    /**
-     * Logger constructor.
-     *
-     * @param Raven_Client $ravenClient
-     */
-    public function __construct(Raven_Client $ravenClient)
-    {
-        $this->setRavenClient($ravenClient);
-    }
-
-    /**
-     * @return Raven_Client
-     */
-    public function getRavenClient()
-    {
-        return $this->ravenClient;
-    }
-
-    /**
-     * @param Raven_Client $ravenClient
-     *
-     * @return $this
-     */
-    public function setRavenClient(Raven_Client $ravenClient)
-    {
-        $this->ravenClient = $ravenClient;
-
-        return $this;
+    public function __construct(
+        Raven_Client $client,
+        SenderInterface $sender = null,
+        SanitizerInterface $sanitizer = null
+    ) {
+        $this->client = $client;
+        $this->sender = $sender ?: new Sender($client, $sanitizer);
+        $this->sanitizer = $sanitizer ?: new Sanitizer();
     }
 
     /**
@@ -77,116 +70,29 @@ class Logger implements LoggerInterface
      * @param string $message
      * @param array  $context
      *
+     * @return void
+     *
      * @throws InvalidArgumentException
      */
     public function log($level, $message, array $context = [])
     {
-        if (!array_key_exists($level, $this->psrPriorityMap)) {
+        if (! array_key_exists($level, $this->psrPriorityMap)) {
             throw new InvalidArgumentException(sprintf(
                 '$level must be one of PSR-3 log levels; received %s',
                 var_export($level, 1)
             ));
         }
 
-        if (is_object($message) && !method_exists($message, '__toString')) {
+        if (is_object($message) && ! method_exists($message, '__toString')) {
             throw new InvalidArgumentException(
                 '$message must implement magic __toString() method'
             );
         }
 
         $priority = $this->psrPriorityMap[$level];
+        $message = $this->interpolate((string) $message, $context);
 
-        if ($this->objectIsThrowable($message)) {
-            /* @var \Throwable $message */
-            $this->getRavenClient()->captureException(
-                $message,
-                [
-                    'extra' => $this->sanitizeContextData($context),
-                    'level' => $priority,
-                ]
-            );
-
-            return;
-        }
-
-        $message = (string) $message;
-
-        if ($this->contextContainsException($context)) {
-            /** @var \Throwable $exception */
-            $exception = $context['exception'];
-            unset($context['exception']);
-
-            $message = $this->interpolate($message, $context);
-
-            $exception = new ContextException($message, $exception->getCode(), $exception);
-
-            $this->getRavenClient()->captureException(
-                $exception,
-                [
-                    'extra' => $this->sanitizeContextData($context),
-                    'level' => $priority,
-                ]
-            );
-
-            return;
-        }
-
-        $this->getRavenClient()->captureMessage(
-            $this->interpolate($message, $context),
-            ['extra' => $this->sanitizeContextData($context)],
-            $priority
-        );
-    }
-
-    /**
-     * @param array $context
-     *
-     * @return array
-     */
-    protected function sanitizeContextData(array $context)
-    {
-        array_walk_recursive($context, [$this, 'sanitizeContextItem']);
-
-        return $context;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    protected function sanitizeContextItem(&$value)
-    {
-        if ($value instanceof \Traversable) {
-            $value = $this->sanitizeContextData(iterator_to_array($value));
-        }
-        if (is_object($value)) {
-            $value = method_exists($value, '__toString') ? (string) $value : get_class($value);
-        } elseif (is_resource($value)) {
-            $value = get_resource_type($value);
-        }
-    }
-
-    /**
-     * @param mixed $object
-     *
-     * @return bool
-     */
-    protected function objectIsThrowable($object)
-    {
-        return $object instanceof \Throwable || $object instanceof \Exception;
-    }
-
-    /**
-     * @param array $context
-     *
-     * @return bool
-     */
-    protected function contextContainsException(array $context)
-    {
-        if (!array_key_exists('exception', $context)) {
-            return false;
-        }
-
-        return $this->objectIsThrowable($context['exception']);
+        $this->sender->send($priority, $message, $context);
     }
 
     /**
@@ -195,10 +101,11 @@ class Logger implements LoggerInterface
      *
      * @return string
      */
-    protected function interpolate($message, array $context = [])
+    protected function interpolate(string $message, array $context = []): string
     {
         $replace = [];
-        $context = $this->sanitizeContextData($context);
+        /** @var array $context */
+        $context = $this->sanitizer->sanitize($context);
         foreach ($context as $key => $val) {
             if (is_array($val)) {
                 continue;
