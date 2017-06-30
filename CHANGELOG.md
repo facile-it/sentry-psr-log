@@ -1,8 +1,12 @@
 # Change Log
 
-## [2.0.1] - TBD
+## [2.0.2] - TBD
 ### Changed
 - Nothing
+
+## [2.0.1] - 2017-06-30
+### Changed
+- Allowed `facile-it/sentry-common` `^0.2.0`
 
 ## [2.0.0] - 2017-06-25
 ### Changed
