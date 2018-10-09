@@ -4,9 +4,7 @@ namespace Facile\Sentry\LogTest;
 
 use Facile\Sentry\Common\Sanitizer\SanitizerInterface;
 use Facile\Sentry\Common\Sender\SenderInterface;
-use Facile\Sentry\Log\ContextException;
 use Facile\Sentry\Log\Logger;
-use Prophecy\Argument;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LogLevel;
 
@@ -43,7 +41,7 @@ class LoggerTest extends \PHPUnit\Framework\TestCase
             $sanitizer->reveal()
         );
 
-        $object = new class {
+        $object = new class() {
             public function __toString()
             {
                 return 'object string';
@@ -74,7 +72,7 @@ class LoggerTest extends \PHPUnit\Framework\TestCase
 
         $context = [
             'foo' => 'name',
-            'placeholder' => 'value'
+            'placeholder' => 'value',
         ];
 
         $sanitizer->sanitize($context)->shouldBeCalled()->willReturn($context);
@@ -99,7 +97,7 @@ class LoggerTest extends \PHPUnit\Framework\TestCase
             'foo' => 'name',
             'placeholder' => [
                 'foo' => 'bar',
-            ]
+            ],
         ];
 
         $sanitizer->sanitize($context)->shouldBeCalled()->willReturn($context);

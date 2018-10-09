@@ -23,10 +23,12 @@ class Logger implements LoggerInterface
      * @var Raven_Client
      */
     protected $client;
+
     /**
      * @var SenderInterface
      */
     private $sender;
+
     /**
      * @var SanitizerInterface
      */
@@ -47,10 +49,15 @@ class Logger implements LoggerInterface
     ];
 
     const DEBUG = 'debug';
+
     const INFO = 'info';
+
     const WARN = 'warning';
+
     const WARNING = 'warning';
+
     const ERROR = 'error';
+
     const FATAL = 'fatal';
 
     public function __construct(
@@ -74,9 +81,9 @@ class Logger implements LoggerInterface
      * @param string $message
      * @param array  $context
      *
-     * @return void
-     *
      * @throws InvalidArgumentException
+     *
+     * @return void
      */
     public function log($level, $message, array $context = [])
     {
@@ -114,7 +121,7 @@ class Logger implements LoggerInterface
             if (is_array($val)) {
                 continue;
             }
-            $replace['{'.$key.'}'] = (string) $val;
+            $replace['{' . $key . '}'] = (string) $val;
         }
 
         return strtr($message, $replace);
