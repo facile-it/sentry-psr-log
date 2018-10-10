@@ -49,6 +49,7 @@ script:
   - if [[ $EXECUTE_TEST_SCRUTINIZER == 'true' ]]; then ./vendor/bin/phpunit --coverage-clover coverage.clover ; fi
   - if [[ $EXECUTE_TEST_SCRUTINIZER != 'true' ]]; then ./vendor/bin/phpunit ; fi
   - if [[ $EXECUTE_CS_CHECK == 'true' ]]; then composer cs-check ; fi
+  - composer ci-phpstan
 
 after_script:
   - if [[ $EXECUTE_TEST_SCRUTINIZER == 'true' ]]; then wget https://scrutinizer-ci.com/ocular.phar ; fi
