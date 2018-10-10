@@ -10,7 +10,7 @@ use Psr\Log\LogLevel;
 
 class LoggerTest extends \PHPUnit\Framework\TestCase
 {
-    public function testLogWithInvalidLevel()
+    public function testLogWithInvalidLevel(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -20,7 +20,7 @@ class LoggerTest extends \PHPUnit\Framework\TestCase
         $logger->log('foo', 'message');
     }
 
-    public function testLogWithInvalidObject()
+    public function testLogWithInvalidObject(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -30,7 +30,7 @@ class LoggerTest extends \PHPUnit\Framework\TestCase
         $logger->log(LogLevel::ALERT, new \stdClass());
     }
 
-    public function testLogWithObject()
+    public function testLogWithObject(): void
     {
         $raven = $this->prophesize(\Raven_Client::class);
         $sender = $this->prophesize(SenderInterface::class);
@@ -42,7 +42,7 @@ class LoggerTest extends \PHPUnit\Framework\TestCase
         );
 
         $object = new class() {
-            public function __toString()
+            public function __toString(): string
             {
                 return 'object string';
             }
@@ -59,7 +59,7 @@ class LoggerTest extends \PHPUnit\Framework\TestCase
         $logger->log(LogLevel::ALERT, $object, $context);
     }
 
-    public function testLog()
+    public function testLog(): void
     {
         $raven = $this->prophesize(\Raven_Client::class);
         $sender = $this->prophesize(SenderInterface::class);
@@ -82,7 +82,7 @@ class LoggerTest extends \PHPUnit\Framework\TestCase
         $logger->log(LogLevel::ALERT, 'message {placeholder}', $context);
     }
 
-    public function testLogWithArrayPlaceholder()
+    public function testLogWithArrayPlaceholder(): void
     {
         $raven = $this->prophesize(\Raven_Client::class);
         $sender = $this->prophesize(SenderInterface::class);

@@ -48,17 +48,17 @@ class Logger implements LoggerInterface
         LogLevel::DEBUG => Raven_Client::DEBUG,
     ];
 
-    const DEBUG = 'debug';
+    public const DEBUG = 'debug';
 
-    const INFO = 'info';
+    public const INFO = 'info';
 
-    const WARN = 'warning';
+    public const WARN = 'warning';
 
-    const WARNING = 'warning';
+    public const WARNING = 'warning';
 
-    const ERROR = 'error';
+    public const ERROR = 'error';
 
-    const FATAL = 'fatal';
+    public const FATAL = 'fatal';
 
     public function __construct(
         Raven_Client $client,
@@ -77,15 +77,15 @@ class Logger implements LoggerInterface
     /**
      * Logs with an arbitrary level.
      *
-     * @param mixed  $level
-     * @param string $message
-     * @param array  $context
+     * @param string        $level
+     * @param string|object $message
+     * @param array         $context
      *
      * @throws InvalidArgumentException
      *
      * @return void
      */
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         if (! array_key_exists($level, $this->psrPriorityMap)) {
             throw new InvalidArgumentException(sprintf(
