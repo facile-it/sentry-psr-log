@@ -87,14 +87,14 @@ class Logger implements LoggerInterface
      */
     public function log($level, $message, array $context = []): void
     {
-        if (! array_key_exists($level, $this->psrPriorityMap)) {
-            throw new InvalidArgumentException(sprintf(
+        if (! \array_key_exists($level, $this->psrPriorityMap)) {
+            throw new InvalidArgumentException(\sprintf(
                 '$level must be one of PSR-3 log levels; received %s',
-                var_export($level, 1)
+                \var_export($level, 1)
             ));
         }
 
-        if (is_object($message) && ! method_exists($message, '__toString')) {
+        if (\is_object($message) && ! \method_exists($message, '__toString')) {
             throw new InvalidArgumentException(
                 '$message must implement magic __toString() method'
             );
@@ -118,12 +118,12 @@ class Logger implements LoggerInterface
         /** @var array $context */
         $context = $this->sanitizer->sanitize($context);
         foreach ($context as $key => $val) {
-            if (is_array($val)) {
+            if (\is_array($val)) {
                 continue;
             }
             $replace['{' . $key . '}'] = (string) $val;
         }
 
-        return strtr($message, $replace);
+        return \strtr($message, $replace);
     }
 }
