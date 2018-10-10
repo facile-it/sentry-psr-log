@@ -19,24 +19,16 @@ class Logger implements LoggerInterface
 {
     use LoggerTrait;
 
-    /**
-     * @var Raven_Client
-     */
+    /** @var Raven_Client */
     protected $client;
 
-    /**
-     * @var SenderInterface
-     */
+    /** @var Sender|SenderInterface */
     private $sender;
 
-    /**
-     * @var SanitizerInterface
-     */
+    /** @var Sanitizer */
     private $sanitizer;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $psrPriorityMap = [
         LogLevel::EMERGENCY => Raven_Client::FATAL,
         LogLevel::ALERT => Raven_Client::ERROR,
