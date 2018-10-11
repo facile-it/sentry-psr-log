@@ -22,10 +22,10 @@ class Logger implements LoggerInterface
     /** @var Raven_Client */
     protected $client;
 
-    /** @var Sender|SenderInterface */
+    /** @var SenderInterface */
     private $sender;
 
-    /** @var Sanitizer|SanitizerInterface */
+    /** @var SanitizerInterface */
     private $sanitizer;
 
     /** @var array */
