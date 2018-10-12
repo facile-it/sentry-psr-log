@@ -40,18 +40,13 @@ class Logger implements LoggerInterface
         LogLevel::DEBUG => Raven_Client::DEBUG,
     ];
 
-    public const DEBUG = 'debug';
-
-    public const INFO = 'info';
-
-    public const WARN = 'warning';
-
-    public const WARNING = 'warning';
-
-    public const ERROR = 'error';
-
-    public const FATAL = 'fatal';
-
+    /**
+     * Logger constructor.
+     *
+     * @param Raven_Client            $client
+     * @param SenderInterface|null    $sender
+     * @param SanitizerInterface|null $sanitizer
+     */
     public function __construct(
         Raven_Client $client,
         SenderInterface $sender = null,
