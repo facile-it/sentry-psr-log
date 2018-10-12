@@ -58,7 +58,7 @@
         ],
         "phpunit": "phpunit",
         "ci-phpunit": "phpunit --coverage-clover=coverage.clover",
-        "ci-phpstan": "phpstan analyse --no-progress -l7 src tests",
+        "ci-phpstan": "phpstan analyse --no-progress -l7 .",
         "cs-check": "php-cs-fixer fix --dry-run --diff --allow-risky=yes",
         "cs-fix": "php-cs-fixer fix --diff"
     }
