@@ -15,22 +15,13 @@ env:
 matrix:
   fast_finish: true
   include:
-    - php: 7.0
+    - php: 7.1
       env:
         - DEPS=lowest
-    - php: 7.0
+    - php: 7.1
       env:
         - EXECUTE_CS_CHECK=true
         - EXECUTE_TEST_SCRUTINIZER=true
-        - DEPS=locked
-    - php: 7.0
-      env:
-        - DEPS=latest
-    - php: 7.1
-      env:
-        - DEPS=lowest
-    - php: 7.1
-      env:
         - DEPS=locked
     - php: 7.1
       env:
@@ -60,6 +51,7 @@ script:
   - if [[ $EXECUTE_TEST_SCRUTINIZER == 'true' ]]; then ./vendor/bin/phpunit --coverage-clover coverage.clover ; fi
   - if [[ $EXECUTE_TEST_SCRUTINIZER != 'true' ]]; then ./vendor/bin/phpunit ; fi
   - if [[ $EXECUTE_CS_CHECK == 'true' ]]; then composer cs-check ; fi
+  - composer ci-phpstan
 
 after_script:
   - if [[ $EXECUTE_TEST_SCRUTINIZER == 'true' ]]; then wget https://scrutinizer-ci.com/ocular.phar ; fi

@@ -19,22 +19,16 @@ class Logger implements LoggerInterface
 {
     use LoggerTrait;
 
-    /**
-     * @var Raven_Client
-     */
+    /** @var Raven_Client */
     protected $client;
-    /**
-     * @var SenderInterface
-     */
+
+    /** @var SenderInterface */
     private $sender;
-    /**
-     * @var SanitizerInterface
-     */
+
+    /** @var SanitizerInterface */
     private $sanitizer;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $psrPriorityMap = [
         LogLevel::EMERGENCY => Raven_Client::FATAL,
         LogLevel::ALERT => Raven_Client::ERROR,
@@ -46,13 +40,13 @@ class Logger implements LoggerInterface
         LogLevel::DEBUG => Raven_Client::DEBUG,
     ];
 
-    const DEBUG = 'debug';
-    const INFO = 'info';
-    const WARN = 'warning';
-    const WARNING = 'warning';
-    const ERROR = 'error';
-    const FATAL = 'fatal';
-
+    /**
+     * Logger constructor.
+     *
+     * @param Raven_Client            $client
+     * @param SenderInterface|null    $sender
+     * @param SanitizerInterface|null $sanitizer
+     */
     public function __construct(
         Raven_Client $client,
         SenderInterface $sender = null,
@@ -70,31 +64,37 @@ class Logger implements LoggerInterface
     /**
      * Logs with an arbitrary level.
      *
-     * @param mixed  $level
-     * @param string $message
-     * @param array  $context
-     *
-     * @return void
+     * @param string        $level
+     * @param string|object $message
+     * @param array         $context
      *
      * @throws InvalidArgumentException
+     *
+     * @return void
      */
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
-        if (! array_key_exists($level, $this->psrPriorityMap)) {
-            throw new InvalidArgumentException(sprintf(
+        if (! \array_key_exists($level, $this->psrPriorityMap)) {
+            throw new InvalidArgumentException(\sprintf(
                 '$level must be one of PSR-3 log levels; received %s',
-                var_export($level, 1)
+                \var_export($level, true)
             ));
         }
 
-        if (is_object($message) && ! method_exists($message, '__toString')) {
-            throw new InvalidArgumentException(
-                '$message must implement magic __toString() method'
-            );
+        if (\is_object($message)) {
+            if (! \method_exists($message, '__toString')) {
+                throw new InvalidArgumentException(
+                    '$message must implement magic __toString() method'
+                );
+            }
+
+            $messageStr = $message->__toString();
+        } else {
+            $messageStr = $message;
         }
 
         $priority = $this->psrPriorityMap[$level];
-        $message = $this->interpolate((string) $message, $context);
+        $message = $this->interpolate($messageStr, $context);
 
         $this->sender->send($priority, $message, $context);
     }
@@ -111,12 +111,12 @@ class Logger implements LoggerInterface
         /** @var array $context */
         $context = $this->sanitizer->sanitize($context);
         foreach ($context as $key => $val) {
-            if (is_array($val)) {
+            if (\is_array($val)) {
                 continue;
             }
-            $replace['{'.$key.'}'] = (string) $val;
+            $replace['{' . $key . '}'] = (string) $val;
         }
 
-        return strtr($message, $replace);
+        return \strtr($message, $replace);
     }
 }
