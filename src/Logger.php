@@ -81,14 +81,20 @@ class Logger implements LoggerInterface
             ));
         }
 
-        if (\is_object($message) && ! \method_exists($message, '__toString')) {
-            throw new InvalidArgumentException(
-                '$message must implement magic __toString() method'
-            );
+        if (\is_object($message)) {
+            if (! \method_exists($message, '__toString')) {
+                throw new InvalidArgumentException(
+                    '$message must implement magic __toString() method'
+                );
+            }
+
+            $messageStr = $message->__toString();
+        } else {
+            $messageStr = $message;
         }
 
         $priority = $this->psrPriorityMap[$level];
-        $message = $this->interpolate((string) $message, $context);
+        $message = $this->interpolate($messageStr, $context);
 
         $this->sender->send($priority, $message, $context);
     }
