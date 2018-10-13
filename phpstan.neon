@@ -1,7 +1,5 @@
 includes:
 	- vendor/jangregor/phpstan-prophecy/src/extension.neon
 parameters:
-    ignoreErrors:
-        - '#^Cannot cast object|string to string$#'
     excludes_analyse:
         - %rootDir%/../../../vendor/*
